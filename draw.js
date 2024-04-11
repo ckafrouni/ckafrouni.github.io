@@ -12,28 +12,28 @@ export function drawSnake(body) {
 /** @param {number} x @param {number} y @param {string} color */
 export function drawApple(x, y, _color) {
     const apple_emoji = '🍎'
-    ctx.font = ctx.BLOCK_HEIGHT + 'px monospace'
+    ctx.font = (ctx.BLOCK_HEIGHT - 5) + 'px monospace'
     const textWidth = ctx.measureText(apple_emoji).width
     const textHeight = ctx.BLOCK_HEIGHT
-    ctx.fillText(apple_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT + textHeight) / 2)
+    ctx.fillText(apple_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT / 2 + textHeight + 5) / 2)
 }
 
 /** @param {number} x @param {number} y @param {string} color */
 export function drawPoison(x, y, _color) {
     const poison_emoji = '💀'
-    ctx.font = ctx.BLOCK_HEIGHT + 'px monospace'
+    ctx.font = (ctx.BLOCK_HEIGHT - 5) + 'px monospace'
     const textWidth = ctx.measureText(poison_emoji).width
     const textHeight = ctx.BLOCK_HEIGHT
-    ctx.fillText(poison_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT + textHeight) / 2)
+    ctx.fillText(poison_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT / 2 + textHeight + 5) / 2)
 }
 
 /** @param {number} x @param {number} y @param {string} color */
 export function drawReverse(x, y, _color) {
     const reverse_emoji = '🔄'
-    ctx.font = ctx.BLOCK_HEIGHT + 'px monospace'
+    ctx.font = (ctx.BLOCK_HEIGHT - 5) + 'px monospace'
     const textWidth = ctx.measureText(reverse_emoji).width
     const textHeight = ctx.BLOCK_HEIGHT
-    ctx.fillText(reverse_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT + textHeight) / 2)
+    ctx.fillText(reverse_emoji, x * (ctx.BLOCK_WIDTH + 1) + (ctx.BLOCK_WIDTH - textWidth) / 2, y * (ctx.BLOCK_HEIGHT + 1) + (ctx.BLOCK_HEIGHT / 2 + textHeight + 5) / 2)
 }
 
 /** @param {number} x @param {number} y @param {string} color */

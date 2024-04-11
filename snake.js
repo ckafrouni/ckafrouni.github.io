@@ -238,3 +238,5 @@ const loop = () => {
         window.requestAnimationFrame(loop)
     }, 1000 / gameState.level.speed)
 }
+gameState.status = 'running'
+window.requestAnimationFrame(loop)
