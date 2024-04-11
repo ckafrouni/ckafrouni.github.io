@@ -1,3 +1,6 @@
+import { levels } from './levels.js';
+import { drawBlock } from './draw.js';
+
 /** @type {HTMLCanvasElement} */
 const c = document.getElementById("canvas")
 
@@ -17,47 +20,9 @@ const BLOCK_WIDTH = c.width / NBLOCKS - 1
 const BLOCK_HEIGHT = c.height / NBLOCKS - 1
 const BLOCK_RADIUS = parseInt(canvasStyles.getPropertyValue('--border-radius'))
 
-// Helper Drawing functions
-
-/** @param {number} x @param {number} y @param {string} color */
-function drawBlock(x, y, color) {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.roundRect(x * (BLOCK_WIDTH + 1), y * (BLOCK_HEIGHT + 1), BLOCK_WIDTH, BLOCK_HEIGHT, BLOCK_RADIUS)
-    ctx.fill()
-}
-
-/** @param {number} x @param {number} y @param {string} color */
-function drawCircle(x, y, color) {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.arc(x * (BLOCK_WIDTH + 1) + BLOCK_WIDTH / 2, y * (BLOCK_HEIGHT + 1) + BLOCK_HEIGHT / 2, BLOCK_WIDTH / 2, 0, 2 * Math.PI)
-    ctx.fill()
-}
-
-/** @param {number} x @param {number} y @param {string} color */
-function drawTriangle(x, y, color) {
-    let position = { x: x * (BLOCK_WIDTH + 1), y: y * (BLOCK_HEIGHT + 1) }
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.moveTo(position.x, position.y)
-    ctx.lineTo(position.x + BLOCK_WIDTH, position.y)
-    ctx.lineTo(position.x + BLOCK_WIDTH / 2, position.y + BLOCK_HEIGHT)
-    ctx.fill()
-}
-
-/** @param {number} x @param {number} y @param {string} color */
-function drawLosange(x, y, color) {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.moveTo(x * (BLOCK_WIDTH + 1), y * (BLOCK_HEIGHT + 1) + BLOCK_HEIGHT / 2)
-    ctx.lineTo(x * (BLOCK_WIDTH + 1) + BLOCK_WIDTH / 2, y * (BLOCK_HEIGHT + 1))
-    ctx.lineTo(x * (BLOCK_WIDTH + 1) + BLOCK_WIDTH, y * (BLOCK_HEIGHT + 1) + BLOCK_HEIGHT / 2)
-    ctx.lineTo(x * (BLOCK_WIDTH + 1) + BLOCK_WIDTH / 2, y * (BLOCK_HEIGHT + 1) + BLOCK_HEIGHT)
-    ctx.fill()
-}
-
-/** @param {number} x @param {number} y @param {number} w @param {number} h @param {number} r */
+ctx.BLOCK_HEIGHT = BLOCK_HEIGHT
+ctx.BLOCK_WIDTH = BLOCK_WIDTH
+ctx.BLOCK_RADIUS = BLOCK_RADIUS
 
 // Game Objects and Drawing
 
@@ -106,74 +71,6 @@ function drawLosange(x, y, color) {
  */
 
 
-/** @type {FoodType} */
-const appleType = {
-    color: 'red',
-    shape: drawCircle,
-    /** @param {GameState} gameState */
-    power: function (gameState) {
-        console.log('Apple eaten')
-        gameState.snake.body.push({ x: gameState.snake.body[gameState.snake.body.length - 1].x, y: gameState.snake.body[gameState.snake.body.length - 1].y })
-    },
-}
-
-/** @type {FoodType} */
-const poisonType = {
-    color: 'purple',
-    shape: drawTriangle,
-    /** @param {GameState} gameState */
-    power: function (gameState) {
-        console.log('Poison eaten')
-        gameState.snake.body.pop()
-        if (gameState.snake.body.length === 0) {
-            console.log('Game Over');
-            gameState.status = 'game-over'
-        }
-    },
-}
-
-/** @type {FoodType} */
-const reverseType = {
-    color: 'blue',
-    shape: drawLosange,
-    /** @param {GameState} gameState */
-    power: function (gameState) {
-        console.log('Reverse eaten')
-        gameState.snake.body.reverse()
-        if (gameState.snake.body.length == 1) {
-            gameState.snake.nextDirection = [{
-                'up': 'down',
-                'down': 'up',
-                'left': 'right',
-                'right': 'left',
-            }[gameState.snake.direction]]
-        } else {
-            const dx = gameState.snake.body[0].x - gameState.snake.body[1].x
-            const dy = gameState.snake.body[0].y - gameState.snake.body[1].y
-            if (dx !== 0) {
-                gameState.snake.nextDirection = dx > 0 ? ['right'] : ['left']
-            } else {
-                gameState.snake.nextDirection = dy > 0 ? ['down'] : ['up']
-            }
-        }
-        gameState.snake.direction = gameState.snake.nextDirection[0]
-    },
-}
-
-
-/**
- * @param {FoodType} type
- * @param {number} x
- * @param {number} y
- * @returns {Food}
- */
-const makeFood = (type, x, y) => ({
-    type,
-    position: { x, y },
-    draw: function () {
-        this.type.shape(this.position.x, this.position.y, this.type.color)
-    }
-})
 
 /** @returns {Snake} */
 const makeSnake = () => ({
@@ -236,104 +133,6 @@ const makeSnake = () => ({
     }
 })
 
-/** @type {Array<GameLevel>} */
-const levels = [
-    {
-        name: 'Easy',
-        walls: false,
-        speed: 8,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return gameState.snake.body.length >= 6
-        }
-    },
-    {
-        name: 'Easy[Walls]',
-        walls: true,
-        speed: 8,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return gameState.snake.body.length >= 12
-        }
-    },
-    {
-        name: 'Medium',
-        walls: false,
-        speed: 8,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 10, 2),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(poisonType, 3, 8),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return gameState.snake.body.length >= 18
-        }
-    },
-    {
-        name: 'Medium[Walls]',
-        walls: true,
-        speed: 8,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 10, 2),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(poisonType, 3, 8),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return gameState.snake.body.length >= 24
-        }
-    },
-    {
-        name: 'Hard',
-        walls: false,
-        speed: 12,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 10, 2),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(poisonType, 3, 8),
-            makeFood(reverseType, 6, 1),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return gameState.snake.body.length >= 30
-        }
-    },
-    {
-        name: 'Hard[Walls]',
-        walls: true,
-        speed: 12,
-        foods: [
-            makeFood(appleType, 8, 8),
-            makeFood(appleType, 10, 2),
-            makeFood(appleType, 3, 5),
-            makeFood(poisonType, 4, 4),
-            makeFood(poisonType, 3, 8),
-            makeFood(reverseType, 6, 1),
-            makeFood(reverseType, 13, 13),
-        ],
-        isComplete: function (gameState) {
-            return false
-        }
-    },
-
-]
 
 
 /** 
