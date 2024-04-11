@@ -7,6 +7,8 @@ const c = document.getElementById("canvas")
 const status = document.getElementById("status")
 const level = document.getElementById("level")
 const score = document.getElementById("score")
+const highscore = document.getElementById("highscore")
+highscore.textContent = localStorage.getItem('highscore') || 0
 
 /** @type {CanvasRenderingContext2D} */
 const ctx = c.getContext('2d')
@@ -229,6 +231,8 @@ const loop = () => {
     status.textContent = gameState.status
     status.setAttribute('status', gameState.status)
     score.textContent = gameState.snake.body.length
+    highscore.textContent = Math.max(parseInt(highscore.textContent), gameState.snake.body.length)
+    localStorage.setItem('highscore', highscore.textContent)
     if (gameState.status !== 'running') {
         return
     }
