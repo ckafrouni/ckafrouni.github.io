@@ -1,5 +1,5 @@
 import { levels } from './levels.js';
-import { drawBlock } from './draw.js';
+import { drawBlock, drawSnake } from './draw.js';
 
 /** @type {HTMLCanvasElement} */
 const c = document.getElementById("canvas")
@@ -82,8 +82,7 @@ const makeSnake = () => ({
         { x: 3, y: 2 },
     ],
     draw: function () {
-        drawBlock(this.body[0].x, this.body[0].y, 'darkgreen')
-        this.body.slice(1).forEach(({ x, y }) => drawBlock(x, y, 'green'))
+        drawSnake(this.body)
     },
     update: function (level) {
         while (this.nextDirection.length > 0) {
