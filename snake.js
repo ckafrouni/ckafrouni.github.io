@@ -74,7 +74,7 @@ function drawLosange(x, y, color) {
  * @typedef FoodType
  * @property {string} color
  * @property {function} shape
- * @property {function} power
+ * @property {function(GameState): void} power
  */
 
 /**
@@ -95,7 +95,7 @@ function drawLosange(x, y, color) {
 
 /**
  * @typedef GameState
- * @property {'running' | 'paused' | 'game-over'} status
+ * @property {'running' | 'paused' | 'game-over' | 'not-started'} status
  * @property {GameLevel} level
  * @property {Snake} snake
  * @property {Array<Food>} apples
@@ -110,10 +110,10 @@ function drawLosange(x, y, color) {
 const appleType = {
     color: 'red',
     shape: drawCircle,
-    /** @param {Snake} snake */
-    power: function (snake) {
+    /** @param {GameState} gameState */
+    power: function (gameState) {
         console.log('Apple eaten')
-        snake.body.push({ x: snake.body[snake.body.length - 1].x, y: snake.body[snake.body.length - 1].y })
+        gameState.snake.body.push({ x: gameState.snake.body[gameState.snake.body.length - 1].x, y: gameState.snake.body[gameState.snake.body.length - 1].y })
     },
 }
 
@@ -121,9 +121,14 @@ const appleType = {
 const poisonType = {
     color: 'purple',
     shape: drawTriangle,
-    power: function (snake) {
+    /** @param {GameState} gameState */
+    power: function (gameState) {
         console.log('Poison eaten')
-        snake.body.pop()
+        gameState.snake.body.pop()
+        if (gameState.snake.body.length === 0) {
+            console.log('Game Over');
+            gameState.status = 'game-over'
+        }
     },
 }
 
@@ -131,26 +136,27 @@ const poisonType = {
 const reverseType = {
     color: 'blue',
     shape: drawLosange,
-    power: function (snake) {
+    /** @param {GameState} gameState */
+    power: function (gameState) {
         console.log('Reverse eaten')
-        snake.body.reverse()
-        if (snake.body.length == 1) {
-            snake.nextDirection = [{
+        gameState.snake.body.reverse()
+        if (gameState.snake.body.length == 1) {
+            gameState.snake.nextDirection = [{
                 'up': 'down',
                 'down': 'up',
                 'left': 'right',
                 'right': 'left',
-            }[snake.direction]]
+            }[gameState.snake.direction]]
         } else {
-            const dx = snake.body[0].x - snake.body[1].x
-            const dy = snake.body[0].y - snake.body[1].y
+            const dx = gameState.snake.body[0].x - gameState.snake.body[1].x
+            const dy = gameState.snake.body[0].y - gameState.snake.body[1].y
             if (dx !== 0) {
-                snake.nextDirection = dx > 0 ? ['right'] : ['left']
+                gameState.snake.nextDirection = dx > 0 ? ['right'] : ['left']
             } else {
-                snake.nextDirection = dy > 0 ? ['down'] : ['up']
+                gameState.snake.nextDirection = dy > 0 ? ['down'] : ['up']
             }
         }
-        snake.direction = snake.nextDirection[0]
+        gameState.snake.direction = gameState.snake.nextDirection[0]
     },
 }
 
@@ -335,7 +341,7 @@ const levels = [
  * @returns {GameState} 
  */
 const makeGameState = (level) => ({
-    status: 'game-over',
+    status: 'not-started',
     level,
     snake: makeSnake(),
     foods: [...level.foods],
@@ -348,14 +354,15 @@ const makeGameState = (level) => ({
         this.snake.update(this.level)
         if (this.snake.body.slice(1).some(segment => segment.x === this.snake.body[0].x && segment.y === this.snake.body[0].y)) {
             this.status = 'game-over'
+            return
         }
         this.foods.forEach(food => {
-            if (food.position.x === this.snake.body[0].x && food.position.y === this.snake.body[0].y) {
+            if (this.status !== 'game-over' && food.position.x === this.snake.body[0].x && food.position.y === this.snake.body[0].y) {
                 food.position = {
                     x: Math.floor(Math.random() * NBLOCKS),
                     y: Math.floor(Math.random() * NBLOCKS),
                 }
-                food.type.power(this.snake)
+                food.type.power(this)
             }
         })
         if (this.level.isComplete(this)) {
@@ -406,6 +413,9 @@ document.addEventListener('keydown', (e) => {
                 gameState.reset()
                 gameState.status = 'running'
                 window.requestAnimationFrame(loop)
+            } else if (gameState.status === 'not-started') {
+                gameState.status = 'running'
+                window.requestAnimationFrame(loop)
             }
             break
     }
@@ -413,21 +423,20 @@ document.addEventListener('keydown', (e) => {
 
 
 const loop = () => {
+    gameState.update()
+
     canvas.setAttribute('status', gameState.status)
     canvas.setAttribute('walls', gameState.level.walls)
     level.textContent = gameState.level.name
     status.textContent = gameState.status
     status.setAttribute('status', gameState.status)
-
     score.textContent = gameState.snake.body.length
     if (gameState.status !== 'running') {
         return
     }
-    gameState.update()
     gameState.draw()
     // Call the next frame
     setTimeout(() => {
         window.requestAnimationFrame(loop)
     }, 1000 / gameState.level.speed)
 }
-window.requestAnimationFrame(loop)
